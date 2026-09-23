@@ -44,6 +44,9 @@ func usage() {
   work close <n> <pr> [writeup-file] close when every box is ticked and the PR is merged
   work lint                          check every open issue's shape (exit 1 on any fault)
   work unclaim-stale <days>          release claims with no activity for <days>
+  work stale [--apply] [--ref <r>] <path>...
+                                     list open plans whose unticked tasks cite a changed
+                                     document; --apply labels them blocked and comments
 `)
 	os.Exit(2)
 }
@@ -78,6 +81,8 @@ func main() {
 		err = lint()
 	case "unclaim-stale":
 		err = unclaimStale(arg(2))
+	case "stale":
+		err = stale(os.Args[2:])
 	default:
 		usage()
 	}
