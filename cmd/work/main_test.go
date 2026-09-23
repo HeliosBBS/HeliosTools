@@ -33,6 +33,40 @@ func blocked(is issue, state string) issue {
 	return is
 }
 
+func withComments(is issue, bodies ...string) issue {
+	for _, b := range bodies {
+		is.Comments = append(is.Comments, struct {
+			Body      string    `json:"body"`
+			CreatedAt time.Time `json:"createdAt"`
+		}{Body: b})
+	}
+	return is
+}
+
+func TestClaimIsTheEarliestSinceRelease(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name     string
+		comments []string
+		want     string
+	}{
+		{"single claim", []string{"Claimed by a[bot]"}, "a[bot]"},
+		{"race: first comment wins", []string{"Claimed by a[bot]", "Claimed by b[bot]"}, "a[bot]"},
+		{"release then a new claim", []string{"Claimed by a[bot]", "Claim released: no activity for 3 days.", "Claimed by b[bot]"}, "b[bot]"},
+		{"released and unclaimed", []string{"Claimed by a[bot]", "Claim released: no activity for 3 days."}, ""},
+		{"other comments ignored", []string{"Loop stopped: x", "Claimed by a[bot]\nmore", "note"}, "a[bot]"},
+		{"no claim", []string{"note"}, ""},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			if got := withComments(issue{}, tc.comments...).claimedBy(); got != tc.want {
+				t.Fatalf("got %q, want %q", got, tc.want)
+			}
+		})
+	}
+}
+
 func TestBlockedByDecodesTheConnectionShape(t *testing.T) {
 	t.Parallel()
 	var is issue

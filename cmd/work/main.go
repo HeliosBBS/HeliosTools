@@ -219,13 +219,24 @@ func (is issue) blockedByOpen() bool {
 	return false
 }
 
+// The claim is the earliest "Claimed by" comment since the last release: two loops
+// that claim in the same second both comment, and the server's order of the comments
+// decides, so the loser's comment is noise and never a claim.
 func (is issue) claimedBy() string {
-	for i := len(is.Comments) - 1; i >= 0; i-- {
-		if who, ok := strings.CutPrefix(is.Comments[i].Body, "Claimed by "); ok {
-			return strings.TrimSpace(strings.SplitN(who, "\n", 2)[0])
+	who := ""
+	for _, c := range is.Comments {
+		if strings.HasPrefix(c.Body, "Claim released") {
+			who = ""
+			continue
+		}
+		if who != "" {
+			continue
+		}
+		if rest, ok := strings.CutPrefix(c.Body, "Claimed by "); ok {
+			who = strings.TrimSpace(strings.SplitN(rest, "\n", 2)[0])
 		}
 	}
-	return ""
+	return who
 }
 
 func (is issue) plan() []string {
@@ -304,12 +315,26 @@ func next(loop bool) error {
 	})
 }
 
+// claim comments first and labels only after re-reading the issue and finding its own
+// comment to be the claim; a loop that lost the race gets an error and picks again.
 func claim(n int) error {
 	s := strconv.Itoa(n)
-	if _, err := gh("", "issue", "edit", s, "--add-label", "claimed"); err != nil {
+	me := identity()
+	if _, err := gh("", "issue", "comment", s, "--body", "Claimed by "+me); err != nil {
 		return err
 	}
-	_, err := gh("", "issue", "comment", s, "--body", "Claimed by "+identity())
+	out, err := gh("", "issue", "view", s, "--json", "comments")
+	if err != nil {
+		return err
+	}
+	var is issue
+	if err := json.Unmarshal(out, &is); err != nil {
+		return err
+	}
+	if who := is.claimedBy(); who != me {
+		return fmt.Errorf("#%d was claimed by %s first", n, who)
+	}
+	_, err = gh("", "issue", "edit", s, "--add-label", "claimed")
 	return err
 }
 
