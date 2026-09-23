@@ -28,11 +28,8 @@ type issue struct {
 	Labels    []struct {
 		Name string `json:"name"`
 	} `json:"labels"`
-	BlockedBy []struct {
-		Number int    `json:"number"`
-		State  string `json:"state"`
-	} `json:"blockedBy"`
-	Comments []struct {
+	BlockedBy blockedBy `json:"blockedBy"`
+	Comments  []struct {
 		Body      string    `json:"body"`
 		CreatedAt time.Time `json:"createdAt"`
 	} `json:"comments"`
@@ -202,8 +199,19 @@ func (is issue) kind() string {
 	return ""
 }
 
+// gh returns the dependency list as a connection: the blockers under nodes with a
+// total count beside them, not a bare array.
+type blockedBy struct {
+	Nodes []blocker `json:"nodes"`
+}
+
+type blocker struct {
+	Number int    `json:"number"`
+	State  string `json:"state"`
+}
+
 func (is issue) blockedByOpen() bool {
-	for _, b := range is.BlockedBy {
+	for _, b := range is.BlockedBy.Nodes {
 		if strings.EqualFold(b.State, "open") {
 			return true
 		}
