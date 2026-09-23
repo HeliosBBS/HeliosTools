@@ -1,10 +1,27 @@
 {
   "extraKnownMarketplaces": {
     "helios": {
-      "source": { "source": "github", "repo": "HeliosBBS/HeliosSkills" }
+      "source": {
+        "source": "github",
+        "repo": "HeliosBBS/HeliosSkills"
+      }
+    },
+    "ponytail": {
+      "source": {
+        "source": "github",
+        "repo": "DietrichGebert/ponytail"
+      }
+    },
+    "humanizer": {
+      "source": {
+        "source": "github",
+        "repo": "blader/humanizer"
+      }
     }
   },
   "enabledPlugins": {
-    "helios@helios": true
+    "helios@helios": true,
+    "ponytail@ponytail": true,
+    "humanizer@humanizer": true
   }
 }
