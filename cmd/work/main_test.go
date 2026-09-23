@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"strings"
 	"testing"
 	"time"
@@ -28,11 +29,23 @@ func claimed(is issue, by string) issue {
 }
 
 func blocked(is issue, state string) issue {
-	is.BlockedBy = append(is.BlockedBy, struct {
-		Number int    `json:"number"`
-		State  string `json:"state"`
-	}{1, state})
+	is.BlockedBy.Nodes = append(is.BlockedBy.Nodes, blocker{1, state})
 	return is
+}
+
+func TestBlockedByDecodesTheConnectionShape(t *testing.T) {
+	t.Parallel()
+	var is issue
+	raw := `{"number":20,"blockedBy":{"nodes":[{"number":19,"state":"OPEN","title":"x"}],"totalCount":1}}`
+	if err := json.Unmarshal([]byte(raw), &is); err != nil {
+		t.Fatalf("decode: %v", err)
+	}
+	if !is.blockedByOpen() {
+		t.Fatal("an open blocker under nodes was not seen")
+	}
+	if err := json.Unmarshal([]byte(`{"number":21,"blockedBy":{"nodes":[],"totalCount":0}}`), &is); err != nil || is.blockedByOpen() {
+		t.Fatalf("no blockers: err=%v open=%v", err, is.blockedByOpen())
+	}
 }
 
 func TestSelectNext(t *testing.T) {
