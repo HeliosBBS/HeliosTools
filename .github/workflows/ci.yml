@@ -1,0 +1,16 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  merge_group:
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  check:
+    uses: HeliosBBS/.github/.github/workflows/check.yml@main
+    permissions:
+      contents: read
