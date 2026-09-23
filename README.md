@@ -18,6 +18,9 @@ work tick <n> <task> <comment>     tick plan box <task>, post the comment
 work close <n> <pr> [writeup-file] close when every box is ticked and the PR is merged
 work lint                          every open issue's shape; exit 1 on any fault
 work unclaim-stale <days>          release claims with no activity for <days>
+work stale [--apply] [--ref <r>] <path>...
+                                   open plans whose unticked tasks cite a changed
+                                   document; --apply labels them blocked, comments once
 ```
 
 Selection is mechanical: the caller's own claimed item, else the first open item by priority
