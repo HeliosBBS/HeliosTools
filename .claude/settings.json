@@ -1,0 +1,10 @@
+{
+  "extraKnownMarketplaces": {
+    "helios": {
+      "source": { "source": "github", "repo": "HeliosBBS/HeliosSkills" }
+    }
+  },
+  "enabledPlugins": {
+    "helios@helios": true
+  }
+}

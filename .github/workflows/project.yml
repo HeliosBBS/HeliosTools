@@ -1,0 +1,14 @@
+name: Board
+
+on:
+  issues:
+    types: [opened, reopened]
+  pull_request_target:
+    types: [opened, reopened]
+
+permissions: {}
+
+jobs:
+  add:
+    uses: HeliosBBS/.github/.github/workflows/add-to-project.yml@main
+    secrets: inherit
