@@ -6,12 +6,6 @@
         "repo": "HeliosBBS/HeliosSkills"
       }
     },
-    "ponytail": {
-      "source": {
-        "source": "github",
-        "repo": "DietrichGebert/ponytail"
-      }
-    },
     "humanizer": {
       "source": {
         "source": "github",
@@ -21,7 +15,6 @@
   },
   "enabledPlugins": {
     "helios@helios": true,
-    "ponytail@ponytail": true,
     "humanizer@humanizer": true
   }
 }
